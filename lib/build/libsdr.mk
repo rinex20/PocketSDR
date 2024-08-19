@@ -23,11 +23,15 @@ else ifeq ($(shell uname -sm),Darwin arm64)
     OPTIONS = -DMACOS -DNEON -Wno-deprecated
     LDLIBS = -L/opt/homebrew/lib ./librtk.a ./libfec.a ./libldpc.a -lfftw3f \
              -lusb-1.0 -lpthread
-else
+else #linux
     CC = g++
     INSTALL = ../linux
     INCLUDE = -I$(SRC) -I../RTKLIB/src
-    OPTIONS = -DAVX2 -mavx2 -mfma
+    # fix "Illegal instruction (core dumped)" on some low-level w/o avx2 cpu 
+    ifeq ($(shell grep -o avx2 /proc/cpuinfo | head -1),avx2)
+       OPTIONS = -DAVX2 -mavx2 -mfma
+    endif
+    #OPTIONS = -DAVX2 -mavx2 -mfma
     LDLIBS = ./librtk.a ./libfec.a ./libldpc.a -lfftw3f -lpthread -lusb-1.0 -lm \
              -lpthread
 endif
